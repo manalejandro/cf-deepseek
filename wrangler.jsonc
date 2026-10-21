@@ -21,16 +21,17 @@
 			"index_name": "deepseek-memory"
 		}
 	],
-	"routes": [
-		// Reemplaza example.com con tu propio dominio (o elimina este bloque para usar solo *.workers.dev)
-		{
-			"pattern": "example.com",
-			"custom_domain": true
-		}
-	],
 	"vars": {
-		"EXPOSED_MODEL": "deepseek-v4-flash-cloudflare",
-		"CLOUDFLARE_MODEL": "@cf/deepseek-ai/deepseek-v4-flash-0731",
+		"EXPOSED_MODEL": "deepseek-v4.1-flash-cloudflare",
+		"CLOUDFLARE_MODEL": "@cf/deepseek-ai/deepseek-v4.1-flash-1017",
 		"EMBEDDING_MODEL": "@cf/baai/bge-m3"
 	}
+	// Custom domain (opcional): añade tu propio dominio, que debe ser una zona de tu cuenta de Cloudflare.
+	// Si no defines rutas, el Worker se publica en <name>.<subdominio>.workers.dev
+	// "routes": [
+	// 	{
+	// 		"pattern": "example.com",
+	// 		"custom_domain": true
+	// 	}
+	// ]
 }

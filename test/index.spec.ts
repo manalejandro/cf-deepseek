@@ -5,7 +5,7 @@ import worker from "../src/index";
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
 
 const API_KEY = "pass123";
-const EXPOSED_MODEL = "deepseek-v4-flash-cloudflare";
+const EXPOSED_MODEL = "deepseek-v4.1-flash-cloudflare";
 
 function sseStream(chunks: string[]): ReadableStream<Uint8Array> {
 	const encoder = new TextEncoder();
@@ -27,7 +27,7 @@ function makeEnv(ai: MockAI, overrides: Record<string, unknown> = {}) {
 	return {
 		API_KEY,
 		EXPOSED_MODEL,
-		CLOUDFLARE_MODEL: "@cf/deepseek-ai/deepseek-v4-flash-0731",
+		CLOUDFLARE_MODEL: "@cf/deepseek-ai/deepseek-v4.1-flash-1017",
 		AI: ai,
 		...overrides,
 	} as unknown as Env;
@@ -484,7 +484,32 @@ describe("vectorize", () => {
 		expect(body.success).toBe(true);
 		expect(body.count).toBe(1);
 		expect(vectorize.upsert).toHaveBeenCalledWith([
-			{ id: "doc1", values: [0.1, 0.2], metadata: { source: "test" } },
+			{
+				id: "doc1",
+				values: [0.1, 0.2],
+				metadata: { source: "test", text: "hola mundo" },
+			},
+		]);
+	});
+
+	it("stores the document text in metadata so RAG can retrieve it", async () => {
+		const run = vi.fn().mockResolvedValue({ data: [[0.3, 0.4]] });
+		const vectorize = vectorizeMock();
+		vectorize.upsert.mockResolvedValue({ mutationId: "mut-3" });
+		const env = makeEnv({ run }, { VECTORIZE: vectorize });
+
+		await fetchWith(env, "https://example.com/engines/v1/vectorize/upsert", {
+			method: "POST",
+			headers: { ...authHeaders(), "content-type": "application/json" },
+			body: JSON.stringify({ documents: [{ id: "doc9", text: "contenido relevante" }] }),
+		});
+
+		expect(vectorize.upsert).toHaveBeenCalledWith([
+			{
+				id: "doc9",
+				values: [0.3, 0.4],
+				metadata: { text: "contenido relevante" },
+			},
 		]);
 	});
 

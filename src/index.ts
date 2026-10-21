@@ -55,8 +55,8 @@ export default {
 	},
 } satisfies ExportedHandler<Env>;
 
-const DEFAULT_EXPOSED_MODEL = "deepseek-v4-flash-cloudflare";
-const DEFAULT_CLOUDFLARE_MODEL = "@cf/deepseek-ai/deepseek-v4-flash-0731";
+const DEFAULT_EXPOSED_MODEL = "deepseek-v4.1-flash-cloudflare";
+const DEFAULT_CLOUDFLARE_MODEL = "@cf/deepseek-ai/deepseek-v4.1-flash-1017";
 const DEFAULT_EMBEDDING_MODEL = "@cf/baai/bge-m3";
 
 type AiRunLike = {
@@ -686,9 +686,7 @@ async function vectorizeUpsert(request: Request, env: Env): Promise<Response> {
 		const vectors: VectorizeVector[] = entries.map((e, i) => ({
 			id: e.id,
 			values: data[i],
-			...(e.metadata
-				? { metadata: e.metadata as VectorizeVector["metadata"] }
-				: {}),
+			metadata: { ...(e.metadata ?? {}), text: e.text } as VectorizeVector["metadata"],
 			...(namespace ? { namespace } : {}),
 		}));
 		const mutation = await env.VECTORIZE.upsert(vectors);
